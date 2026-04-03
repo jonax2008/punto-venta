@@ -1,0 +1,28 @@
+# Environment
+.env
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# PHP / Laravel
+backend/vendor/
+backend/storage/logs/*.log
+backend/.env
+backend/database/database.sqlite
+backend/public/storage
+backend/bootstrap/cache/*.php
+
+# Docker
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
