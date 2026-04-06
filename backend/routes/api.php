@@ -31,9 +31,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('users', UserController::class);
     });
 
-    // Solo Admin
+    // Lectura de grupos — admin ve todos; encargado y cajero ven solo el suyo
+    Route::middleware('role:admin,group_manager,cashier')->group(function () {
+        Route::get('/groups', [GroupController::class, 'index']);
+        Route::get('/groups/{group}', [GroupController::class, 'show']);
+    });
+
+    // Escritura de grupos — solo admin
     Route::middleware('role:admin')->group(function () {
-        Route::apiResource('groups', GroupController::class);
+        Route::post('/groups', [GroupController::class, 'store']);
+        Route::put('/groups/{group}', [GroupController::class, 'update']);
+        Route::patch('/groups/{group}', [GroupController::class, 'update']);
+        Route::delete('/groups/{group}', [GroupController::class, 'destroy']);
     });
 
     // Admin + Encargado + Cajero (operaciones del día)
@@ -44,6 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders/{order}', [OrderController::class, 'show']);
         Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
         Route::patch('/orders/{order}/confirm', [OrderController::class, 'confirm']);
+        Route::patch('/orders/{order}/prepare', [OrderController::class, 'prepare']);
+        Route::patch('/orders/{order}/ready', [OrderController::class, 'ready']);
         Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel']);
 
         Route::post('/cash-registers/open', [CashRegisterController::class, 'open']);

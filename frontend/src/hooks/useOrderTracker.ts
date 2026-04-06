@@ -4,7 +4,10 @@ import type { OrderStatus } from '@/types/models'
 interface TrackerState {
   status: OrderStatus
   orderNumber: string
+  clientName: string | null
   confirmedAt: string | null
+  preparedAt: string | null
+  readyAt: string | null
   cancelledAt: string | null
   connected: boolean
 }
@@ -13,7 +16,10 @@ export function useOrderTracker(orderId: string | number) {
   const [state, setState] = useState<TrackerState>({
     status: 'pending',
     orderNumber: '',
+    clientName: null,
     confirmedAt: null,
+    preparedAt: null,
+    readyAt: null,
     cancelledAt: null,
     connected: false,
   })
@@ -29,7 +35,10 @@ export function useOrderTracker(orderId: string | number) {
         ...s,
         status: data.status,
         orderNumber: data.order_number,
+        clientName: data.client_name,
         confirmedAt: data.confirmed_at,
+        preparedAt: data.prepared_at,
+        readyAt: data.ready_at,
         cancelledAt: data.cancelled_at,
       }))
     }

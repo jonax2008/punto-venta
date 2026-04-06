@@ -25,6 +25,8 @@ export function formatDateShort(dateStr: string): string {
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending:   'Pendiente',
   confirmed: 'Confirmado',
+  preparing: 'En preparación',
+  ready:     'Listo',
   cancelled: 'Cancelado',
 }
 

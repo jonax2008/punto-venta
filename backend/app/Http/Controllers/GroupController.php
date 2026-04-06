@@ -10,13 +10,23 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GroupController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
-        return GroupResource::collection(Group::with('manager')->get());
+        $user = $request->user();
+
+        $groups = $user->isAdmin()
+            ? Group::with('manager')->get()
+            : Group::with('manager')->where('id', $user->group_id)->get();
+
+        return GroupResource::collection($groups);
     }
 
-    public function show(Group $group): GroupResource
+    public function show(Request $request, Group $group): GroupResource
     {
+        $user = $request->user();
+
+        abort_unless($user->isAdmin() || $user->group_id === $group->id, 403);
+
         return new GroupResource($group->load('manager'));
     }
 

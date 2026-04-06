@@ -2,6 +2,7 @@ import apiClient from './client'
 import type { Order, PaginatedResponse } from '@/types/models'
 
 export interface CreateOrderPayload {
+  client_name?: string
   notes?: string
   discount?: number
   items: { product_id: number; quantity: number; notes?: string }[]
@@ -19,8 +20,16 @@ export const ordersApi = {
   create: (data: CreateOrderPayload) =>
     apiClient.post<{ data: Order }>('/orders', data).then((r) => r.data.data),
 
-  confirm: (id: number) =>
-    apiClient.patch<{ data: Order }>(`/orders/${id}/confirm`).then((r) => r.data.data),
+  confirm: (id: number, amountReceived?: number) =>
+    apiClient
+      .patch<{ data: Order }>(`/orders/${id}/confirm`, { amount_received: amountReceived ?? null })
+      .then((r) => r.data.data),
+
+  markPreparing: (id: number) =>
+    apiClient.patch<{ data: Order }>(`/orders/${id}/prepare`).then((r) => r.data.data),
+
+  markReady: (id: number) =>
+    apiClient.patch<{ data: Order }>(`/orders/${id}/ready`).then((r) => r.data.data),
 
   cancel: (id: number, reason?: string) =>
     apiClient

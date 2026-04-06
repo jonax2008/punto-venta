@@ -1,5 +1,5 @@
 export type UserRole = 'admin' | 'group_manager' | 'cashier' | 'client'
-export type OrderStatus = 'pending' | 'confirmed' | 'cancelled'
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled'
 export type CashRegisterStatus = 'open' | 'closed'
 
 export interface Group {
@@ -49,13 +49,17 @@ export interface Order {
   group?: Group
   cash_register_id: number | null
   client?: User | null
+  client_name: string | null
   cashier?: User
   status: OrderStatus
   subtotal: number
   discount: number
   total: number
+  amount_received: number | null
   notes: string | null
   confirmed_at: string | null
+  prepared_at: string | null
+  ready_at: string | null
   cancelled_at: string | null
   cancellation_reason: string | null
   items: OrderItem[]

@@ -7,7 +7,7 @@ services:
       MYSQL_USER: pvuser
       MYSQL_PASSWORD: pvpassword
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -28,7 +28,6 @@ services:
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
-      APP_KEY: ""
       APP_URL: http://localhost:8000
       DB_CONNECTION: mysql
       DB_HOST: db
@@ -44,6 +43,7 @@ services:
       SANCTUM_STATEFUL_DOMAINS: localhost:5173
       SESSION_DRIVER: file
       CACHE_STORE: file
+      PHP_CLI_SERVER_WORKERS: 4
     ports:
       - "8000:8000"
     volumes:
@@ -59,7 +59,7 @@ services:
     depends_on:
       - backend
     environment:
-      VITE_API_URL: http://localhost:8000
+      VITE_API_URL: http://backend:8000
     ports:
       - "5173:5173"
     volumes:

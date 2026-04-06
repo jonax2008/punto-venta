@@ -80,9 +80,31 @@ class OrderController extends Controller
 
     public function confirm(Request $request, Order $order): OrderResource
     {
-        $confirmed = $this->orderService->confirmOrder($order, $request->user());
+        $request->validate([
+            'amount_received' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $confirmed = $this->orderService->confirmOrder(
+            $order,
+            $request->user(),
+            $request->amount_received !== null ? (float) $request->amount_received : null,
+        );
 
         return new OrderResource($confirmed->load(['group', 'cashier', 'client', 'items']));
+    }
+
+    public function prepare(Request $request, Order $order): OrderResource
+    {
+        $prepared = $this->orderService->markPreparing($order, $request->user());
+
+        return new OrderResource($prepared->load(['group', 'cashier', 'client', 'items']));
+    }
+
+    public function ready(Request $request, Order $order): OrderResource
+    {
+        $ready = $this->orderService->markReady($order, $request->user());
+
+        return new OrderResource($ready->load(['group', 'cashier', 'client', 'items']));
     }
 
     public function cancel(Request $request, Order $order): OrderResource

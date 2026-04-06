@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useOrderTracker } from '@/hooks/useOrderTracker'
-import { CheckCircle, Clock, XCircle, ShoppingCart, Wifi, WifiOff } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, ShoppingCart, Wifi, WifiOff, ChefHat, BellRing } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { OrderStatus } from '@/types/models'
 
@@ -8,14 +8,26 @@ const STATUS_CONFIG: Record<OrderStatus, { icon: React.ReactNode; label: string;
   pending: {
     icon: <Clock className="h-16 w-16" />,
     label: 'Pedido pendiente',
-    desc: 'Tu pedido está en espera de ser confirmado por el equipo de ventas.',
+    desc: 'Tu pedido está en espera de ser cobrado por el cajero.',
     color: 'text-amber-500',
   },
   confirmed: {
     icon: <CheckCircle className="h-16 w-16" />,
-    label: '¡Pedido confirmado!',
-    desc: 'Tu pedido ha sido confirmado. ¡Gracias por tu compra!',
+    label: '¡Pedido cobrado!',
+    desc: 'Tu pago fue recibido. El pedido pasará pronto a preparación.',
     color: 'text-emerald-500',
+  },
+  preparing: {
+    icon: <ChefHat className="h-16 w-16" />,
+    label: 'En preparación',
+    desc: '¡Tu pedido está siendo preparado! Ya casi está.',
+    color: 'text-blue-500',
+  },
+  ready: {
+    icon: <BellRing className="h-16 w-16" />,
+    label: '¡Listo para entregar!',
+    desc: 'Tu pedido está listo. ¡Pasa a recogerlo!',
+    color: 'text-purple-500',
   },
   cancelled: {
     icon: <XCircle className="h-16 w-16" />,
@@ -25,11 +37,27 @@ const STATUS_CONFIG: Record<OrderStatus, { icon: React.ReactNode; label: string;
   },
 }
 
+const PROGRESS_STEPS: { status: OrderStatus; label: string }[] = [
+  { status: 'pending',   label: 'Pendiente' },
+  { status: 'confirmed', label: 'Cobrado' },
+  { status: 'preparing', label: 'Preparando' },
+  { status: 'ready',     label: 'Listo' },
+]
+
+const STATUS_ORDER: Record<OrderStatus, number> = {
+  pending:   0,
+  confirmed: 1,
+  preparing: 2,
+  ready:     3,
+  cancelled: -1,
+}
+
 export function OrderTrackerPage() {
   const { orderId } = useParams<{ orderId: string }>()
   const tracker     = useOrderTracker(orderId ?? '')
 
-  const config = STATUS_CONFIG[tracker.status]
+  const config      = STATUS_CONFIG[tracker.status]
+  const currentIdx  = STATUS_ORDER[tracker.status]
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface-subtle p-6">
@@ -42,6 +70,9 @@ export function OrderTrackerPage() {
           <h1 className="text-xl font-bold text-gray-900">Tracker de pedido</h1>
           {tracker.orderNumber && (
             <p className="mt-1 font-mono text-sm text-gray-500">{tracker.orderNumber}</p>
+          )}
+          {tracker.clientName && (
+            <p className="mt-0.5 text-sm font-medium text-gray-700">{tracker.clientName}</p>
           )}
         </div>
 
@@ -56,14 +87,16 @@ export function OrderTrackerPage() {
           </div>
 
           {tracker.confirmedAt && (
-            <p className="text-xs text-gray-400">
-              Confirmado: {formatDate(tracker.confirmedAt)}
-            </p>
+            <p className="text-xs text-gray-400">Cobrado: {formatDate(tracker.confirmedAt)}</p>
+          )}
+          {tracker.preparedAt && (
+            <p className="text-xs text-gray-400">En preparación: {formatDate(tracker.preparedAt)}</p>
+          )}
+          {tracker.readyAt && (
+            <p className="text-xs text-gray-400">Listo: {formatDate(tracker.readyAt)}</p>
           )}
           {tracker.cancelledAt && (
-            <p className="text-xs text-gray-400">
-              Cancelado: {formatDate(tracker.cancelledAt)}
-            </p>
+            <p className="text-xs text-gray-400">Cancelado: {formatDate(tracker.cancelledAt)}</p>
           )}
 
           {/* Indicador de conexión */}
@@ -82,31 +115,46 @@ export function OrderTrackerPage() {
           </div>
         </div>
 
-        {/* Barra de progreso */}
-        <div className="mt-6 flex items-center gap-2">
-          {(['pending', 'confirmed'] as OrderStatus[]).map((s, idx) => (
-            <div key={s} className="flex flex-1 items-center gap-2">
-              <div
-                className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                  tracker.status === s
-                    ? 'bg-primary text-white'
-                    : tracker.status === 'confirmed' && idx === 0
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-gray-200 text-gray-400'
-                }`}
-              >
-                {idx + 1}
-              </div>
-              {idx === 0 && (
-                <div className={`flex-1 h-1 rounded-full ${tracker.status === 'confirmed' ? 'bg-emerald-500' : 'bg-gray-200'}`} />
-              )}
+        {/* Barra de progreso (solo cuando no está cancelado) */}
+        {tracker.status !== 'cancelled' && (
+          <>
+            <div className="mt-6 flex items-center">
+              {PROGRESS_STEPS.map((step, idx) => {
+                const stepIdx    = STATUS_ORDER[step.status]
+                const isActive   = currentIdx === stepIdx
+                const isComplete = currentIdx > stepIdx
+
+                return (
+                  <div key={step.status} className="flex flex-1 items-center">
+                    <div
+                      className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
+                        isComplete
+                          ? 'bg-emerald-500 text-white'
+                          : isActive
+                            ? 'bg-primary text-white'
+                            : 'bg-gray-200 text-gray-400'
+                      }`}
+                    >
+                      {idx + 1}
+                    </div>
+                    {idx < PROGRESS_STEPS.length - 1 && (
+                      <div
+                        className={`flex-1 h-1 rounded-full mx-1 transition-colors ${
+                          currentIdx > stepIdx ? 'bg-emerald-500' : 'bg-gray-200'
+                        }`}
+                      />
+                    )}
+                  </div>
+                )
+              })}
             </div>
-          ))}
-        </div>
-        <div className="mt-1.5 flex justify-between text-xs text-gray-400">
-          <span>Pendiente</span>
-          <span>Confirmado</span>
-        </div>
+            <div className="mt-1.5 flex justify-between text-xs text-gray-400">
+              {PROGRESS_STEPS.map((step) => (
+                <span key={step.status}>{step.label}</span>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

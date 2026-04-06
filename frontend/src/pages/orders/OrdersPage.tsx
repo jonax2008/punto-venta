@@ -11,10 +11,12 @@ import { useAuth } from '@/hooks/useAuth'
 import type { OrderStatus } from '@/types/models'
 
 const STATUS_FILTERS: { label: string; value: string }[] = [
-  { label: 'Todos', value: '' },
-  { label: 'Pendientes', value: 'pending' },
-  { label: 'Confirmados', value: 'confirmed' },
-  { label: 'Cancelados', value: 'cancelled' },
+  { label: 'Todos',           value: '' },
+  { label: 'Pendientes',      value: 'pending' },
+  { label: 'Cobrados',        value: 'confirmed' },
+  { label: 'En preparación',  value: 'preparing' },
+  { label: 'Listos',          value: 'ready' },
+  { label: 'Cancelados',      value: 'cancelled' },
 ]
 
 export function OrdersPage() {
@@ -25,6 +27,8 @@ export function OrdersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['orders', status, page],
     queryFn: () => ordersApi.list({ status: status || undefined, page }),
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   })
 
   const orders = data?.data ?? []
@@ -85,6 +89,9 @@ export function OrdersPage() {
                     {order.order_number}
                   </span>
                   <OrderStatusBadge status={order.status as OrderStatus} />
+                  {order.client_name && (
+                    <span className="text-xs font-medium text-gray-700">{order.client_name}</span>
+                  )}
                   {order.group && (
                     <span className="text-xs text-gray-400">{order.group.name}</span>
                   )}

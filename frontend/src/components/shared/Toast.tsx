@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { CheckCircle, XCircle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -18,10 +18,10 @@ const ToastContext = createContext<ToastContextValue>({ toast: () => {} })
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
-  let counter = 0
+  const counterRef = useRef(0)
 
   const toast = useCallback((message: string, variant: ToastVariant = 'success') => {
-    const id = ++counter
+    const id = ++counterRef.current
     setToasts((t) => [...t, { id, message, variant }])
     setTimeout(() => setToasts((t) => t.filter((item) => item.id !== id)), 4000)
   }, [])

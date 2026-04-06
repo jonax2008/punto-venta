@@ -22,14 +22,16 @@ class ReportController extends Controller
         $from = $request->query('from', now()->startOfMonth()->toDateString());
         $to   = $request->query('to', now()->toDateString());
 
+        $soldStatuses = ['confirmed', 'preparing', 'ready'];
+
         $data = Group::withCount([
             'orders as total_orders' => fn($q) => $q
-                ->where('status', 'confirmed')
+                ->whereIn('status', $soldStatuses)
                 ->whereBetween('confirmed_at', [$from . ' 00:00:00', $to . ' 23:59:59']),
         ])
         ->withSum([
             'orders as total_sales' => fn($q) => $q
-                ->where('status', 'confirmed')
+                ->whereIn('status', $soldStatuses)
                 ->whereBetween('confirmed_at', [$from . ' 00:00:00', $to . ' 23:59:59']),
         ], 'total')
         ->get()
@@ -61,9 +63,11 @@ class ReportController extends Controller
         $groupId = $request->query('group_id');
         $limit   = $request->query('limit', 10);
 
+        $soldStatuses = ['confirmed', 'preparing', 'ready'];
+
         $data = DB::table('order_items')
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->where('orders.status', 'confirmed')
+            ->whereIn('orders.status', $soldStatuses)
             ->whereBetween('orders.confirmed_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
             ->when($groupId, fn($q) => $q->where('orders.group_id', $groupId))
             ->select(

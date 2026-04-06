@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Pencil, Power } from 'lucide-react'
 import { productsApi } from '@/api/products'
@@ -154,8 +154,8 @@ export function ProductsPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {products.map((product) => (
-                  <>
-                    <tr key={product.id} className="hover:bg-surface-subtle">
+                  <Fragment key={product.id}>
+                    <tr className="hover:bg-surface-subtle">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           {product.image_url ? (
@@ -212,7 +212,7 @@ export function ProductsPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>

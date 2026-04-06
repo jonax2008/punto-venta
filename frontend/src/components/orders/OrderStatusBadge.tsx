@@ -8,6 +8,8 @@ interface Props {
 const classMap: Record<OrderStatus, string> = {
   pending:   'badge-pending',
   confirmed: 'badge-confirmed',
+  preparing: 'badge-preparing',
+  ready:     'badge-ready',
   cancelled: 'badge-cancelled',
 }
 

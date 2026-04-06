@@ -9,19 +9,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'order_number', 'group_id', 'cash_register_id', 'client_id', 'cashier_id',
-        'status', 'subtotal', 'discount', 'total', 'notes',
-        'confirmed_at', 'cancelled_at', 'cancellation_reason',
+        'order_number', 'group_id', 'cash_register_id', 'client_id', 'client_name', 'cashier_id',
+        'status', 'subtotal', 'discount', 'total', 'amount_received', 'notes',
+        'confirmed_at', 'prepared_at', 'ready_at', 'cancelled_at', 'cancellation_reason',
     ];
 
     protected function casts(): array
     {
         return [
-            'subtotal'     => 'decimal:2',
-            'discount'     => 'decimal:2',
-            'total'        => 'decimal:2',
-            'confirmed_at' => 'datetime',
-            'cancelled_at' => 'datetime',
+            'subtotal'        => 'decimal:2',
+            'discount'        => 'decimal:2',
+            'total'           => 'decimal:2',
+            'amount_received' => 'decimal:2',
+            'confirmed_at'    => 'datetime',
+            'prepared_at'     => 'datetime',
+            'ready_at'        => 'datetime',
+            'cancelled_at'    => 'datetime',
         ];
     }
 
@@ -58,5 +61,15 @@ class Order extends Model
     public function isConfirmed(): bool
     {
         return $this->status === 'confirmed';
+    }
+
+    public function isPreparing(): bool
+    {
+        return $this->status === 'preparing';
+    }
+
+    public function isReady(): bool
+    {
+        return $this->status === 'ready';
     }
 }

@@ -18,7 +18,10 @@ class OrderTrackerController extends Controller
                 echo 'data: ' . json_encode([
                     'status'       => $order->status,
                     'order_number' => $order->order_number,
+                    'client_name'  => $order->client_name,
                     'confirmed_at' => $order->confirmed_at?->toISOString(),
+                    'prepared_at'  => $order->prepared_at?->toISOString(),
+                    'ready_at'     => $order->ready_at?->toISOString(),
                     'cancelled_at' => $order->cancelled_at?->toISOString(),
                 ]) . "\n\n";
 
@@ -27,7 +30,7 @@ class OrderTrackerController extends Controller
                 }
                 flush();
 
-                if ($order->status !== 'pending') {
+                if (in_array($order->status, ['ready', 'cancelled'])) {
                     break;
                 }
 

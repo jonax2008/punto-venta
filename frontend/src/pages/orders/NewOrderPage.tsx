@@ -16,6 +16,7 @@ export function NewOrderPage() {
   const { user } = useAuth()
   const navigate  = useNavigate()
   const { toast } = useToast()
+  const [clientName, setClientName] = useState('')
   const [notes, setNotes] = useState('')
   const [discount, setDiscount] = useState(0)
 
@@ -45,6 +46,7 @@ export function NewOrderPage() {
     }
 
     createOrder.mutate({
+      client_name: clientName.trim() || undefined,
       notes,
       discount,
       items: items.map((i) => ({
@@ -123,6 +125,18 @@ export function NewOrderPage() {
                 <span>Total</span>
                 <span className="text-lg text-primary">{formatCurrency(total)}</span>
               </div>
+            </div>
+
+            <div>
+              <label className="label">Nombre del cliente (opcional)</label>
+              <input
+                type="text"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                className="input"
+                placeholder="Ej. Juan, Mesa 3..."
+                maxLength={100}
+              />
             </div>
 
             <div>
